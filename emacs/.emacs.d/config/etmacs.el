@@ -64,7 +64,7 @@
   ; TODO - port general linux config
   (when (getenv "WSL_DISTRO_NAME")
     (progn (require 'wsl-config) (et-init-wsl CONF STEM))
-    (setq LANGS '(l-yaml l-xml l-sql))))
+    (setq LANGS '(l-yaml l-xml l-sql l-javascript l-typescript l-csharp))))
 
 ;;==============================================================================
 ;; Keymaps
@@ -75,6 +75,7 @@
 (define-key et/org-map (kbd "a") 'et/gai-map)
 
 ;;==============================================================================
+
 (require 'gui-config) ; user interface
 (require 'dev-config) ; development
 (require 'org-config) ; org-mode

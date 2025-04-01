@@ -54,11 +54,14 @@
   (use-package flycheck
     :config
     (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
-  (use-package tree-sitter)
+  (use-package tree-sitter
+    :ensure t)
   (use-package treesit-auto
+    :ensure t
     :custom
     (treesit-auto-install 'prompt)
     :config
+    (global-treesit-auto-mode)
     (treesit-auto-add-to-auto-mode-alist 'all))
   (use-package restclient
     :mode ("\\.http\\'" . restclient-mode))
@@ -170,21 +173,25 @@
   "Initialize TypeScript dev env"
   (interactive)
   (message "Initializing TypeScript mode")
-  (ignore-errors (eglot-ensure))
   (assq-delete-all 'typescript-mode eglot-server-programs)
   (add-to-list 'eglot-server-programs
 	       '((typescript-mode) "typescript-language-server" "--stdio"))
+  (add-to-list 'auto-mode-alist '("\\.ts$" . typescript-ts-mode))
+  (add-to-list 'auto-mode-alist '("\\.tsx$" . tsx-ts-mode))
   ;; Typescript project find fix copied from https://notes.alexkehayias.com
   (cl-defmethod project-root ((project (head eglot-project))) (cdr project))
   (add-hook 'project-find-functions
 	    (lambda (dir)
 	      (when-let* ((dir (locate-dominating-file dir "tsconfig.json")))
 		(cons 'eglot-project dir))))
-  (add-hook 'typescript-mode-hook
-	    (lambda ()
-	      (progn (setq indent-tabs-mode nil)
+  (let ((tshook
+	 (lambda ()
+	      (progn (eglot-ensure)
+		     (setq indent-tabs-mode nil)
 		     (setq tab-width 4)
 		     (setq typescript-ts-mode-indent-offset 4)))))
+    (add-hook 'typescript-mode-hook tshook)
+    (add-hook 'typescript-ts-mode-hook tshook)))
 
 (defun l-javascript ()
   "Initialize JavaScript dev env"
@@ -195,7 +202,13 @@
   (add-to-list 'auto-mode-alist '("\\.js$" . typescript-ts-mode))
   (add-to-list 'auto-mode-alist '("\\.jsx$" . tsx-ts-mode))
   (flycheck-add-mode 'javascript-eslint 'typescript-ts-mode)
-  (l-typescript))
+  (l-typescript)
+  (add-hook 'js-mode-hook
+          (lambda ()
+	    (eglot-ensure)
+            (setq indent-tabs-mode t) 
+            (setq tab-width 4)
+            (setq js-indent-level 4))))
 
 (defun l-web ()
   "Initialize web-dev env"
@@ -264,26 +277,63 @@
 ;;==============================================================================
 ;; C# / .NET
 
-
-;; (defun l-csharp ()
-;;   (use-package csharp-mode
-;;     :mode ("\\.cs\\'")
-;;     :init
-;;     (let ((path "~/.dotnet/tools/csharp-ls"))
-;;       ;;(add-to-list 'eglot-server-programs '(csharp-mode . ("csharp-ls")))
-;;       ;;(add-to-list 'eglot-server-programs '(csharp-ts-mode . ("csharp-ls")))
-;;       (setcdr (assoc '(csharp-mode csharp-ts-mode) eglot-server-programs)
-;; 	      `(,path))
-;;       (setcdr (assoc 'csharp-mode eglot-server-programs) `(,path))
-;;       (setcdr (assoc 'csharp-ts-mode eglot-server-programs) `(,path)))
-;;     :hook ((csharp-mode csharp-ts-mode) . eglot-ensure)))
+(defun l-csharp ()
+  (interactive)
+  ;;(add-to-list 'exec-path "~/omnisharp")
+  (add-to-list 'exec-path "~/.dotnet/tools")  
+  ;; (use-package lsp-mode
+  ;;   :config  
+  ;;   (add-to-list 'exec-path "/home/ewan/.dotnet/tools/csharp-ls")
+  ;;   (add-to-list 'lsp-disabled-clients 'omnisharp)
+  ;;   (add-to-list 'lsp-disabled-clients 'Omnisharp))
+  (use-package csharp-mode
+    :mode ("\\.cs\\'")
+    :config
+    (let ((csharp-ls "~/.dotnet/tools/csharp-ls"))
+      (setcdr (assoc '(csharp-mode csharp-ts-mode) eglot-server-programs)
+	      (eglot-alternatives
+               `((,csharp-ls)
+		 ("omnisharp" "-lsp")
+		 ("Omnisharp" "-lsp")))))
+    :hook
+    ;;((csharp-mode csharp-ts-mode) . lsp)
+    ((csharp-mode csharp-ts-mode) . eglot-ensure))
+  (use-package sharper
+    :demand t
+    :bind
+    ("C-c n" . sharper-main-transient))
+  ;; https://github.com/OmniSharp/omnisharp-roslyn/issues/2589
+  ;; project-find-function supporting both C# and F#:
+  (defun dotnet-mode/find-sln-or-fsproj (dir-or-file)
+    "Search for a solution or F# project file in any enclosing folders"
+    (dotnet-mode-search-upwards (rx (0+ nonl) (or ".sln" ".csproj") eol)
+				(file-name-directory dir-or-file)))
+  (defun dotnet-mode-search-upwards (regex dir)
+    (when dir
+      (or (car-safe (directory-files dir 'full regex))
+          (dotnet-mode-search-upwards regex (dotnet-mode-parent-dir dir)))))
+  (defun dotnet-mode-parent-dir (dir)
+    (let ((p (file-name-directory (directory-file-name dir))))
+      (unless (equal p dir)
+	p)))
+  ;; Make project.el aware of dotnet projects
+  (defun dotnet-mode-project-root (dir)
+    (when-let (project-file (dotnet-mode/find-sln-or-fsproj dir))
+      (cons 'dotnet (file-name-directory project-file))))
+  (cl-defmethod project-roots ((project (head dotnet)))
+    (list (cdr project)))
+  (add-hook 'project-find-functions #'dotnet-mode-project-root))
 
 ;;==============================================================================
 ;; Markup langs
 (defun l-xml ()
+  (interactive)
   (use-package nxml
-	:mode ("\\.xml\\'" "\\.uim\\'" "\\.vim\\'")
-	:hook  (nxml-mode . et-xml-format)))
+    :mode ("\\.xml\\'" "\\.uim\\'" "\\.vim\\'")
+    :hook  (nxml-mode . et-xml-format))
+  (setq auto-mode-alist
+	(mapcar (lambda (p) (if (equal (cdr-safe p) 'nxml) (cons (car p) 'nxml-mode) p))
+		auto-mode-alist)))
 
 (defun et-xml-format ()
   (interactive)
