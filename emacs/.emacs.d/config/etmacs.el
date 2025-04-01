@@ -1,13 +1,13 @@
 ;; -*- lexical-binding: t -*-
 ;; Entry point to etmacs
-;==============================================================================
+;;==============================================================================
 (setq debug-on-error t)
 (prefer-coding-system 'utf-8)
 
 (setq user-full-name "Ewan Townshend"
       user-mail-address "ewan@etown.dev")
 
-;==============================================================================
+;;==============================================================================
 (defconst STEM "~/-/")
 (defconst CONF (concat user-emacs-directory "config/"))
 (defconst MODULES (concat CONF "modules/"))
@@ -26,7 +26,7 @@
   (when (file-exists-p env)
     (load-file env)))
 
-;==============================================================================
+;;==============================================================================
 (require 'package)
 (setq package-enable-at-startup t)
 (setq package-archives
@@ -43,7 +43,7 @@
 (require 'use-package)
 (require 'use-package-ensure)
 (setq use-package-always-ensure t)
-;==============================================================================
+;;==============================================================================
 (require 'utils)
 
 (defvar LANGS '() "Function symbols to be called by development configuration")
@@ -66,7 +66,15 @@
     (progn (require 'wsl-config) (et-init-wsl CONF STEM))
     (setq LANGS '(l-yaml l-xml l-sql))))
 
-;==============================================================================
+;;==============================================================================
+;; Keymaps
+(define-prefix-command 'et/org-map)
+(global-set-key (kbd "S-<return>") 'open-line)    
+(global-set-key (kbd "C-o") 'et/org-map)
+(define-prefix-command 'et/gai-map)
+(define-key et/org-map (kbd "a") 'et/gai-map)
+
+;;==============================================================================
 (require 'gui-config) ; user interface
 (require 'dev-config) ; development
 (require 'org-config) ; org-mode
@@ -101,7 +109,7 @@
 	      (et-init-ergonomics)
 	      (add-hook 'after-init-hook 'shell))))
 
-;==============================================================================
+;;==============================================================================
 (setq byte-compile-warnings '()) ; errors only
 (when (equal 1 (random 10))
   (byte-recompile-directory (concat user-emacs-directory "elpa/") 0))
@@ -115,4 +123,4 @@
 
 (add-hook 'emacs-startup-hook 'et-clock-startup)
 
-;==============================================================================
+;;==============================================================================

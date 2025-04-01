@@ -36,36 +36,55 @@
 ;;                                     (pdf-view-midnight-minor-mode 1)))))
 
 ;===============================================================================
-(defun et-init-ai-tools ()  
-  ;; (use-package chatgpt-shell
-  ;;   :custom
-  ;;   ((chatgpt-shell-openai-key (getenv "TAI_KEY"))
-  ;;    (chatgpt-shell-api-url-base "api.together.ai")
-  ;;    (chatgpt-shell-model-version "mistralai/Mixtral-8x7B-Instruct-v0.1")))
+(defun et-init-ai-tools ()
+  (interactive)
   (use-package gptel    
     :config
-    (async-shell-command "ollama serve")
-    (setq gptel-model 'llama3
-	  gptel-backend (gptel-make-ollama "ollama"
-			  :host "localhost:11434"
-			  :stream t
-			  :models '(llama3)))
-    ;; (setq gptel-model "mistralai/Mixtral-8x7B-Instruct-v0.1"
-    ;;       gptel-backend
-    ;;       (gptel-make-openai "HAL"
-    ;; 	    :host "api.together.ai"
-    ;; 	    :key (getenv "TAI_KEY")
-    ;; 	    :stream t
-    ;; 	    :models '("mistralai/Mixtral-8x7B-Instruct-v0.1"
-    ;; 		      "codellama/CodeLlama-13b-Instruct-hf"
-    ;; 		      "codellama/CodeLlama-34b-Instruct-hf")))
-    ))
+    (with-system darwin
+      (async-shell-command "ollama serve")
+      (setq gptel-model 'llama3
+	    gptel-backend (gptel-make-ollama "HAL"
+			    :host "localhost:11434"
+			    :stream t
+			    :models '(llama3)))
+      (gptel-make-openai "HAL"
+	:host "api.together.ai"
+	:key (getenv "GAI_API_KEY")
+	:stream t
+	:models '("mistralai/Mixtral-8x7B-Instruct-v0.1"
+		  "codellama/CodeLlama-13b-Instruct-hf"
+		  "codellama/CodeLlama-34b-Instruct-hf")))
+    (with-system gnu/linux
+      (when (getenv "WSL_DISTRO_NAME")
+	(setq
+	 gptel-model 'gpt-3.5-turbo
+	 gptel-backend (gptel-make-azure "HAL"
+			 :protocol "https"
+			 :host "YOUR_RESOURCE_NAME.openai.azure.com"
+			 :endpoint "/openai/deployments/YOUR_DEPLOYMENT_NAME/chat/completions?api-version=2023-05-15"
+			 :stream t
+			 :key (getenv "GAI_API_KEY")
+			 :models '(gpt-3.5-turbo gpt-4)))))
+    (setq gptel-post-response-functions
+	  (lambda (begin end)
+	    (progn (when (string-equal "*HAL*" (buffer-name))
+		     (goto-char (point-max))))))
+    :bind
+    (:map et/gai-map
+	  ("<return>" . gptel-send)
+	  ("<escape>" . gptel-abort)
+	  ("a" . gptel-add)
+	  ("m" . gptel-menu)
+	  ("r" . gptel-rewrite)
+	  ("o" . gptel)))
+    ;; (use-package chatgpt-shell
+    ;;   :custom
+    ;;   ((chatgpt-shell-openai-key (getenv "TAI_KEY"))
+    ;;    (chatgpt-shell-api-url-base "api.together.ai")
+    ;;    (chatgpt-shell-model-version "mistralai/Mixtral-8x7B-Instruct-v0.1")))
+    )
 
 
-;(use-package wolfram
-;  :config
-;  (setq wolfram-alpha-app-id "43X66J-3RL7UAKAQ3"))
-
 
 ;; (define-prefix-command 'et/chatgpt-map)
 ;; (use-package chatgpt-shell
@@ -116,7 +135,7 @@
 ;;     (chatgpt-shell-send-to-buffer prmt)))
 
 
-;==============================================================================
+					;==============================================================================
 ;; Remote
 ;; (use-package tramp
 ;;   :config
@@ -131,14 +150,14 @@
 ;; (setq sql-default-directory "/ssh:remote.students.cs.ubc.ca:~")
 ;; (setq sql-oracle-program "/cs/local/generic/bin/sqlplus");
 ;; (setq sql-oracle-login-params '("ora_eat" "a37371242" "stu"))
-;(add-hook 'sql-login-hook 'login-hook)
-;(defun login-hook ()
-;  "Custom SQL log-in behaviours. See `sql-login-hook'."
-;  (setq sql-prompt-regexp ".*")
-;  (let ((proc (get-buffer-process (current-buffer))))
-;    (comint-send-string proc "ora_eat/a37371242@stu\n")))
+					;(add-hook 'sql-login-hook 'login-hook)
+					;(defun login-hook ()
+					;  "Custom SQL log-in behaviours. See `sql-login-hook'."
+					;  (setq sql-prompt-regexp ".*")
+					;  (let ((proc (get-buffer-process (current-buffer))))
+					;    (comint-send-string proc "ora_eat/a37371242@stu\n")))
 
-;==============================================================================
+					;==============================================================================
 (setq erc-server "irc.libera.chat"
       erc-nick "etown"    
       erc-user-full-name "ET"      

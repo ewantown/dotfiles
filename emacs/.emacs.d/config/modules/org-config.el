@@ -19,9 +19,6 @@
 (defun et-init-org (stem)
   (interactive)
   (let ((org-env (et-make-org-env stem)))
-    (define-prefix-command 'et/org-map)
-    (global-set-key (kbd "S-<return>") 'open-line)
-    (global-set-key (kbd "C-o") 'et/org-map)
     (use-package htmlize)
     (use-package org-superstar)
     (use-package org
@@ -47,20 +44,20 @@
       (:map et/org-map
 	    ("M-<return>" . org-babel-execute-src-block)
 	    ("t" . org-insert-structure-template)
-	    ("<return>" . gptel-send)
+	    ;;("<return>" . gptel-send)
 	    ("s" . org-store-link)
 	    ("i" . org-insert-link)
 	    ("c" . org-capture)
-	    ("a" . org-agenda)
+	    ;;("a" . org-agenda)
 	    ("A" . et/go-home)
 	    ("r" . org-cite-insert)
 	    ("C-F" . org-footnote-new)
-	    ("f" . org-footnote-action)
-	    ("C-a" . et/chatgpt-map)
+	    ("f" . org-footnote-action)	    
 	    ("s" . org-store-link)
 	    ("C-n" . org-next-visible-heading)
 	    ("C-p" . org-previous-visible-heading)
-	    ("P" . org-publish-all)))))
+	    ("P" . org-publish-all)
+	    ("C-a" . et/ai-map)))))
 
 (defun et-init-org-time (env)
   (progn
@@ -71,72 +68,72 @@
 	  (make-directory diarydir t))
 	(unless (file-exists-p diary-file)
 	  (write-region "" nil diary-file)))))
-    (setq calendar-date-style 'iso
-	  diary-show-holidays-flag nil
-	  calendar-mark-diary-entries-flag t
-	  holiday-islamic-holidays nil
-	  holiday-hebrew-holidays nil
-	  holiday-bahai-holidays nil
-	  holiday-christian-holidays nil
-	  holiday-oriental-holidays nil
-	  holiday-other-holidays nil)
-    (setq org-todo-keywords
-	  '((sequence "TODO" "DOIN" "|" "DONE")
-	    (sequence "{ }" "{~}" "|" "{*}")
-	    (sequence "{-}" "|" "{+}")
-	    (sequence "{?}" "|" "{*}")))
-    (setq org-todo-keyword-faces
-	  '(("TODO" . (:foreground "#f67c8b" :weight bold))
-	    ("DOIN" . (:foreground "#fb91fb" :weight bold))
-	    ("DONE" . (:foreground "#9cfdcd" :weight bold))
-	    ("{ }" . (:foreground "#f67c8b" :weight bold))
-	    ("{-}" . (:foreground "#f67c8b" :weight bold))
-	    ("{~}" . (:foreground "#fb91fb" :weight bold))
-	    ("{?}" . (:foreground "#ff7f00" :weight bold))
-	    ("{*}" . (:foreground "#9cfdcd" :weight bold))))
-    (setq org-agenda-include-diary t)
-    (setq org-agenda-files
-	  (append (file-expand-wildcards (concat (funcall env 'docs) "*.org"))
-		  (file-expand-wildcards (concat (funcall env 'time) "*.org"))))
-    (setq org-agenda-prefix-format
-	  '((agenda . " %?-12t% s ")
-	    (todo . " %i ");%?-12:c")
-	    (tags . " %i %-12:c")
-	    (search . " %i %-12:c")))
-    (setq org-agenda-custom-commands
-	'(("n" "Now" ; "homepage"
-	       ((agenda "" ((org-agenda-span 1)
-				(org-agenda-overriding-header "TODAY:")
-				(org-agenda-skip-function
-				 '(org-agenda-skip-entry-if
-				       'todo
-				   '("TODO" "DOIN" "{ }" "{~}")))
-				(org-deadline-warning-days 1)
-				(org-deadline-past-days 1)))
-		(todo "TODO|DOIN|{ }|{~}|{?}"
+  (setq calendar-date-style 'iso
+	diary-show-holidays-flag nil
+	calendar-mark-diary-entries-flag t
+	holiday-islamic-holidays nil
+	holiday-hebrew-holidays nil
+	holiday-bahai-holidays nil
+	holiday-christian-holidays nil
+	holiday-oriental-holidays nil
+	holiday-other-holidays nil)
+  (setq org-todo-keywords
+	'((sequence "TODO" "DOIN" "|" "DONE")
+	  (sequence "{ }" "{~}" "|" "{*}")
+	  (sequence "{-}" "|" "{+}")
+	  (sequence "{?}" "|" "{*}")))
+  (setq org-todo-keyword-faces
+	'(("TODO" . (:foreground "#f67c8b" :weight bold))
+	  ("DOIN" . (:foreground "#fb91fb" :weight bold))
+	  ("DONE" . (:foreground "#9cfdcd" :weight bold))
+	  ("{ }" . (:foreground "#f67c8b" :weight bold))
+	  ("{-}" . (:foreground "#f67c8b" :weight bold))
+	  ("{~}" . (:foreground "#fb91fb" :weight bold))
+	  ("{?}" . (:foreground "#ff7f00" :weight bold))
+	  ("{*}" . (:foreground "#9cfdcd" :weight bold))))
+  (setq org-agenda-include-diary t)
+  (setq org-agenda-files
+	(append (file-expand-wildcards (concat (funcall env 'docs) "*.org"))
+		(file-expand-wildcards (concat (funcall env 'time) "*.org"))))
+  (setq org-agenda-prefix-format
+	'((agenda . " %?-12t% s ")
+	  (todo . " %i ")		;%?-12:c")
+	  (tags . " %i %-12:c")
+	  (search . " %i %-12:c")))
+  (setq org-agenda-custom-commands
+	'(("n" "Now"			; "homepage"
+	   ((agenda "" ((org-agenda-span 1)
+			(org-agenda-overriding-header "TODAY:")
+			(org-agenda-skip-function
+			 '(org-agenda-skip-entry-if
+			   'todo
+			   '("TODO" "DOIN" "{ }" "{~}")))
+			(org-deadline-warning-days 1)
+			(org-deadline-past-days 1)))
+	    (todo "TODO|DOIN|{ }|{~}|{?}"
 		  ((org-agenda-overriding-header "TASKS:")
 		   (org-agenda-skip-function
 		    '(org-agenda-skip-entry-if 'regexp ":routine:"))))
-		(agenda "" ((org-agenda-overriding-header "SOON:\n")
-				(org-agenda-start-day "+1d")
-				(org-agenda-span 10)
-				(tags "+CATEGORY=\"Event\"" "-CATEGORY=\"Cyclic\"")
-				(org-agenda-skip-function
-				 '(org-agenda-skip-entry-if
-				       'todo
-				       '("TODO" "DOIN" "DONE" "{-}" "{ }")
+	    (agenda "" ((org-agenda-overriding-header "SOON:\n")
+			(org-agenda-start-day "+1d")
+			(org-agenda-span 10)
+			(tags "+CATEGORY=\"Event\"" "-CATEGORY=\"Cyclic\"")
+			(org-agenda-skip-function
+			 '(org-agenda-skip-entry-if
+			   'todo
+			   '("TODO" "DOIN" "DONE" "{-}" "{ }")
 			   'regexp ":routine:"))))))))
-    ;; (use-package pomidor
-    ;;   :bind ((:map et/org-map
-    ;;		   ("c" . pomidor)))
-    ;;   :config (setq pomidor-sound-tick t
-    ;;                 pomidor-sound-tack t)
-    ;;   :hook (pomidor-mode . (lambda ()
-    ;;                           (display-line-numbers-mode -1) ; Emacs 26.1+
-    ;;                           (setq left-fringe-width 0 right-fringe-width 0)
-    ;;                           (setq left-margin-width 2 right-margin-width 0)
-    ;;                           (set-window-buffer nil (current-buffer)))))
-    )
+  ;; (use-package pomidor
+  ;;   :bind ((:map et/org-map
+  ;;		   ("c" . pomidor)))
+  ;;   :config (setq pomidor-sound-tick t
+  ;;                 pomidor-sound-tack t)
+  ;;   :hook (pomidor-mode . (lambda ()
+  ;;                           (display-line-numbers-mode -1) ; Emacs 26.1+
+  ;;                           (setq left-fringe-width 0 right-fringe-width 0)
+  ;;                           (setq left-margin-width 2 right-margin-width 0)
+  ;;                           (set-window-buffer nil (current-buffer)))))
+  )
 
 (defun et-go-home ()
   (interactive)
@@ -295,7 +292,7 @@
   (interactive)  
   (let ((stem (or stem STEM)))
     (use-package nice-org-html
-      :ensure nil ; use local repo for dev
+      ;; :ensure nil ; use local repo for dev
       :hook (org-mode . nice-org-html-mode)
       :config
       (setq org-html-validation-link nil)

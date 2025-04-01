@@ -40,7 +40,8 @@
       NSGlobalDomain = {        
         InitialKeyRepeat = 15;
         KeyRepeat = 3;
-        
+
+        "com.apple.trackpad.scaling" = 2.5;
         "com.apple.swipescrolldirection" = false;
         "com.apple.sound.beep.feedback" = 0;
         
