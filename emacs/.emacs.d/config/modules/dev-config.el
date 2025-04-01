@@ -173,21 +173,25 @@
   "Initialize TypeScript dev env"
   (interactive)
   (message "Initializing TypeScript mode")
-  (ignore-errors (eglot-ensure))
   (assq-delete-all 'typescript-mode eglot-server-programs)
   (add-to-list 'eglot-server-programs
 	       '((typescript-mode) "typescript-language-server" "--stdio"))
+  (add-to-list 'auto-mode-alist '("\\.ts$" . typescript-ts-mode))
+  (add-to-list 'auto-mode-alist '("\\.tsx$" . tsx-ts-mode))
   ;; Typescript project find fix copied from https://notes.alexkehayias.com
   (cl-defmethod project-root ((project (head eglot-project))) (cdr project))
   (add-hook 'project-find-functions
 	    (lambda (dir)
 	      (when-let* ((dir (locate-dominating-file dir "tsconfig.json")))
 		(cons 'eglot-project dir))))
-  (add-hook 'typescript-mode-hook
-	    (lambda ()
-	      (progn (setq indent-tabs-mode nil)
+  (let ((tshook
+	 (lambda ()
+	      (progn (eglot-ensure)
+		     (setq indent-tabs-mode nil)
 		     (setq tab-width 4)
 		     (setq typescript-ts-mode-indent-offset 4)))))
+    (add-hook 'typescript-mode-hook tshook)
+    (add-hook 'typescript-ts-mode-hook tshook)))
 
 (defun l-javascript ()
   "Initialize JavaScript dev env"
@@ -201,6 +205,7 @@
   (l-typescript)
   (add-hook 'js-mode-hook
           (lambda ()
+	    (eglot-ensure)
             (setq indent-tabs-mode t) 
             (setq tab-width 4)
             (setq js-indent-level 4))))
