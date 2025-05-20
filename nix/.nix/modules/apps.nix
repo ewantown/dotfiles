@@ -12,10 +12,11 @@
   ];
   environment.shellAliases = {
     "ls" = "ls -a";
-    "nixit" = 
-      "cd ~/.nix "
-      + "&& nix build .#darwinConfigurations.ETAir.system --show-trace "
-      + "&& nix run nix-darwin -- switch --flake .#ETAir";
+    "nixit" =      
+      "cd /Users/${username}/.nix "
+      + "&& sudo $(which nix) build .#darwinConfigurations.ETAir.system --show-trace "
+      + "&& sudo $(which nix) run nix-darwin -- switch --flake .#ETAir ";
+      /*+ "&& sudo $(which darwin-rebuild) switch --flake";*/
   };
   
   nix-homebrew = {
@@ -43,6 +44,8 @@
       "ollama"
     ];
     casks = [
+      "mactex"
+      "google-chrome"
       "librewolf"
       "emacs"
       "rectangle"

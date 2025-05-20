@@ -16,8 +16,7 @@
 
     #flake-utils.url = "github:numtide/flake-utils";
     
-    nix-homebrew.url = "github:zhaofengli-wip/nix-homebrew";
-
+    nix-homebrew.url = "github:zhaofengli/nix-homebrew";
     nixpkgs-firefox-darwin.url = "github:bandithedoge/nixpkgs-firefox-darwin";
   };
 
@@ -48,4 +47,4 @@
         ];
       };
     };
-}  
+}

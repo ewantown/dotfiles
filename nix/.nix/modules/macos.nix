@@ -1,12 +1,14 @@
-{ pkgs, ... }:
+{ pkgs, username, ... }:
 {
   system = {
+    primaryUser="${username}";
     stateVersion = 5;
 
+    /* Deprecated with Nix-Darwin migration to multi-user
     activationScripts.postUserActivation.text = ''
       /System/Library/PrivateFrameworks/SystemAdministration.framework/Resources/activateSettings -u
     '';
-
+    */
     defaults = {
       # See system.defaults... at https://daiderd.com/nix-darwin/manual/index.html
       

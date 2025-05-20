@@ -12,14 +12,18 @@
     shellAliases = {
       # todo
     };
-  };
 
+    sessionPath = [
+      "/Library/TeX/texbin"
+    ];
+  };
+  
   programs = {    
     home-manager.enable = true;
 
     zsh = {
       enable = true;
-      initExtra = ''
+      initContent = ''
         eval "$(/opt/homebrew/bin/brew shellenv)"
       '';
     };
