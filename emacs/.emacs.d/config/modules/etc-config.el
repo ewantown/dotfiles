@@ -58,21 +58,31 @@
       (when (getenv "WSL_DISTRO_NAME")
 	(setq
 	 gptel-model 'gpt-3.5-turbo
-	 gptel-backend (gptel-make-azure "HAL"
-			 :protocol "https"
-			 :host "YOUR_RESOURCE_NAME.openai.azure.com"
-			 :endpoint "/openai/deployments/YOUR_DEPLOYMENT_NAME/chat/completions?api-version=2023-05-15"
-			 :stream t
-			 :key (getenv "GAI_API_KEY")
-			 :models '(gpt-3.5-turbo gpt-4)))))
+	 gptel-backend
+	 ;; (gptel-make-azure "HAL"
+	 ;;   :protocol "https"
+	 ;;   :host "YOUR_RESOURCE_NAME.openai.azure.com"
+	 ;;   :endpoint "/openai/deployments/YOUR_DEPLOYMENT_NAME/chat/completions?api-version=2023-05-15"
+	 ;;   :stream t
+	 ;;   :key (getenv "GAI_API_KEY")
+	 ;;   :models '(gpt-3.5-turbo gpt-4))
+	 (gptel-make-openai "HAL"
+	   :host "api.together.ai"
+	   :key (getenv "GAI_API_KEY")
+	   :stream t
+	   :models '("meta-llama/Llama-3.3-70B-Instruct-Turbo"
+		     "mistralai/Mixtral-8x7B-Instruct-v0.1"
+		     "codellama/CodeLlama-13b-Instruct-hf"
+		     "codellama/CodeLlama-34b-Instruct-hf"))	 
+	 )))
     (setq gptel-post-response-functions
 	  (lambda (begin end)
 	    (progn (when (string-equal "*HAL*" (buffer-name))
 		     (goto-char (point-max))))))
     :bind
     (:map et/gai-map
-	  ("<return>" . gptel-send)
-	  ("<escape>" . gptel-abort)
+	  ("RET" . gptel-send)
+	  ("ESC" . gptel-abort)
 	  ("a" . gptel-add)
 	  ("m" . gptel-menu)
 	  ("r" . gptel-rewrite)

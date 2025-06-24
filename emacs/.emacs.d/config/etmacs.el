@@ -64,7 +64,7 @@
   ; TODO - port general linux config
   (when (getenv "WSL_DISTRO_NAME")
     (progn (require 'wsl-config) (et-init-wsl CONF STEM))
-    (setq LANGS '(l-yaml l-xml l-sql l-javascript l-typescript l-csharp))))
+    (setq LANGS '(l-yaml l-xml l-sql l-javascript l-typescript l-csharp l-web))))
 
 ;;==============================================================================
 ;; Keymaps

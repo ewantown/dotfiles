@@ -1,4 +1,3 @@
-
 ;; -*- lexical-binding: t -*-
 ;; Development configuration
 ;;==============================================================================
@@ -187,9 +186,10 @@
   (let ((tshook
 	 (lambda ()
 	      (progn (eglot-ensure)
+		     (setq fill-column 95)
 		     (setq indent-tabs-mode nil)
-		     (setq tab-width 4)
-		     (setq typescript-ts-mode-indent-offset 4)))))
+		     (setq tab-width 2)
+		     (setq typescript-ts-mode-indent-offset 2)))))
     (add-hook 'typescript-mode-hook tshook)
     (add-hook 'typescript-ts-mode-hook tshook)))
 
@@ -221,7 +221,17 @@
 	  web-mode-code-indent-offset 2
 	  web-mode-enable-auto-pairing t
 	  web-mode-enable-css-colorization t
-	  web-mode-enable-current-element-highlight t)))
+	  web-mode-enable-current-element-highlight t)
+    ;; (let ((node_modules "/home/ewan/.nvm/versions/node/v18.20.8/lib/node_modules"))
+    ;;   (add-to-list 'eglot-server-programs
+    ;; 		   '(web-mode "node"
+    ;;                           (concat node_modules "/@angular/language-server/")
+    ;;                           "--ngProbeLocations"
+    ;;                           node_modules
+    ;;                           "--tsProbeLocations"
+    ;;                           node_modules
+    ;;                           "--stdio")))
+    ))
 
 (defun l-nix ()
   (interactive)

@@ -99,9 +99,13 @@
 			:box "#494949"))
   (use-package windmove
     :bind (("C-c <left>" . windmove-left)
+	   ("C-c b" . windmove-left)
 	   ("C-c <right>" . windmove-right)
+	   ("C-c f" . windmove-right)
 	   ("C-c <up>" . windmove-up)
-	   ("C-c <down>" . windmove-down)))
+	   ("C-c p" . windmove-up)	   
+	   ("C-c <down>" . windmove-down)
+	   ("C-c n" . windmove-down)))
   (use-package buffer-move
     :bind (("C-c M-<up>" . buf-move-up)
 	   ("C-c M-<down>" . buf-move-down)
