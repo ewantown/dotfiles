@@ -301,8 +301,8 @@
       (setq org-publish-use-timestamps-flag nil)
       (setq nice-org-html-theme-alist
             '((dark . tomorrow-night-eighties) (light . solo-jazz)))
-      (setq org-publish-project-alist
-	    (et-get-org-publish-project-alist stem))
+      ;; (setq org-publish-project-alist
+      ;; 	    (et-get-org-publish-project-alist stem))
       )))
 
 (defun et-nice-org-html-sample-project (stem id light-thm dark-thm)

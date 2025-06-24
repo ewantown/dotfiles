@@ -254,8 +254,10 @@
 
 (defun et-sql-connection-string (dbms inst)
   "Construct SQL connection string for INST using environment vars for DBMS"
-  (let ((user (getenv (concat (upcase dbms) "_USER")))
-	(pass (getenv (concat (upcase dbms) "_PASS"))))
+  (let* ((users (cdr-safe (assoc dbms (read (getenv "DB_USER")))))
+	 (passes (cdr-safe (assoc dbms (read (getenv "DB_PASS")))))
+	 (user (or (cdr-safe (assoc (upcase inst) users)) (read-string "User: ")))
+	 (pass (or (cdr-safe (assoc (upcase inst) passes)) (read-string "Password: "))))
     (match (upcase dbms)
 	   ("DB2"
 	    (concat "connect to '" inst "' user '" user "' using '" pass "';"))
@@ -276,13 +278,20 @@
 	    (window (selected-window)))
 	(progn
 	  (funcall (cdr (assoc dbms et-dbms-alist)) buff)
-	  (if new
+	  (when new
+	    (let* ((connect-str (et-sql-connection-string dbms inst))
+		   (helper (concat user-emacs-directory "/config/dropins/completion-helper.sql"))
+		   (help-buffer (generate-new-buffer (file-name-nondirectory helper))))
 	      (progn
+		(with-current-buffer help-buffer
+		  (insert-file-contents helper)
+		  (sql-mode))
+		(sit-for 1)
 		(switch-to-buffer buff)
 		(toggle-truncate-lines 1)
 		(comint-clear-buffer)
-		(insert (et-sql-connection-string dbms inst))
-		(comint-send-input)))
+		(insert connect-str)
+		(comint-send-input))))
 	  (select-window window))))))
 ;;==============================================================================
 ;; C# / .NET
