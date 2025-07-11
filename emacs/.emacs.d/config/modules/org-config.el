@@ -52,7 +52,7 @@
 	    ("A" . et/go-home)
 	    ("r" . org-cite-insert)
 	    ("C-F" . org-footnote-new)
-	    ("f" . org-footnote-action)	    
+	    ("f" . org-footnote-action)
 	    ("s" . org-store-link)
 	    ("C-n" . org-next-visible-heading)
 	    ("C-p" . org-previous-visible-heading)
@@ -289,10 +289,10 @@
 
 ;===============================================================================
 (defun et-init-org-html-publish (&optional stem)
-  (interactive)  
+  (interactive)
   (let ((stem (or stem STEM)))
     (use-package nice-org-html
-      ;; :ensure nil ; use local repo for dev
+      ;; :ensure nil ;; use local repo for dev
       :hook (org-mode . nice-org-html-mode)
       :config
       (setq org-html-validation-link nil)
@@ -300,51 +300,54 @@
 	    (concat user-emacs-directory ".org-timestamps/"))
       (setq org-publish-use-timestamps-flag nil)
       (setq nice-org-html-theme-alist
-            '((dark . tomorrow-night-eighties) (light . solo-jazz)))
-      ;; (setq org-publish-project-alist
-      ;; 	    (et-get-org-publish-project-alist stem))
-      )))
+	    '((dark . tomorrow-night-eighties) (light . solo-jazz)))
+      (setq org-publish-project-alist
+	    (et-get-org-publish-project-alist stem)))))
 
-(defun et-nice-org-html-sample-project (stem id light-thm dark-thm)
-  (let* ((basedir
-	  (concat stem "local/repos/nice-org-html/docs/samples/source/"))
-	 (pubdir
-	  (concat stem "local/repos/nice-org-html/docs/samples/" id "/"))
-	 (header
-          '(("SITE NAME" . "/route/to/home.html")
-            ("Foo" . "/route/to/foo.html")
-            ("Bar" . "/route/to/bar.html")
-            ("Baz" . "/route/to/baz.html")))
-	 (footer 
-          '(("© Ewan Townshend" . "mailto:e@etown.dev")
-            ("GitHub" . "https://github.com/ewantown")
-            ("LinkedIn" . "https://linkedin.com/in/ewan-townshend")))
-	 (theme-alist (list (cons 'light light-thm) (cons 'dark dark-thm)))
-	 (default-mode 'dark)
-	 (headline-bullets (list :h1 "1" :h2 "2" :h3 "3" :h4 "4" :h5 "5"))
-	 (pubfn
-	  (nice-org-html-make-publishing-function
-	   `((light . ,light-thm) (dark . ,dark-thm))
-	   'dark
-	   nil header footer "" ""
-	   '(:collapsing t :src-lang t))))
-    `(,(format "nice-org-html/sample/%s" id)
-      :base-directory ,basedir
-      :base-extension "org"
-      :publishing-directory ,pubdir      
-      :htmlized-source t
-      :headline-levels 5
-      :section-numbers nil
-      :with-entities t
-      :with-latex t
-      :with-toc t
-      :with-author nil
-      :with-creator nil
-      :with-date nil
-      :with-email nil
-      :time-stamp-file nil
-      :publishing-function ,pubfn
-      )))
+(defmacro et-nice-org-html-sample-project (stem id light-thm dark-thm)
+  `(let* ((basedir
+	   (concat ,stem "local/repos/nice-org-html/docs/samples/source/"))
+	  (pubdir
+	   (concat ,stem "local/repos/nice-org-html/docs/samples/" ,id "/"))
+	  (header
+	   '(("SITE NAME" . "/route/to/home.html")
+	     ("Foo" . "/route/to/foo.html")
+	     ("Bar" . "/route/to/bar.html")
+	     ("Baz" . "/route/to/baz.html")))
+	  (footer
+	   '(("© Ewan Townshend" . "mailto:e@etown.dev")
+	     ("GitHub" . "https://github.com/ewantown")
+	     ("LinkedIn" . "https://linkedin.com/in/ewan-townshend")))
+	  (theme-alist (list (cons 'light ,light-thm) (cons 'dark ,dark-thm)))
+	  (default-mode 'dark)
+	  (headline-bullets (list :h1 "1" :h2 "2" :h3 "3" :h4 "4" :h5 "5"))
+	  (pubfn
+	   ;; (nice-org-html-make-publishing-function
+	   ;;  (list (cons 'light ,light-thm) (cons 'dark ,dark-thm))
+	   ;;  'dark
+	   ;;  nil header footer "" ""
+	   ;;  '(:collapsing t :src-lang t))))
+	   (nice-org-html-publishing-function
+	    :theme-alist ((light . ,(eval light-thm)) (dark . ,(eval dark-thm)))
+	    :default-mode dark
+	    :collapsing t
+	    :src-lang t)))
+     (list (format "nice-org-html/sample/%s" ,id)
+	   :base-directory basedir
+	   :base-extension "org"
+	   :publishing-directory pubdir
+	   :htmlized-source t
+	   :headline-levels 5
+	   :section-numbers nil
+	   :with-entities t
+	   :with-latex t
+	   :with-toc t
+	   :with-author nil
+	   :with-creator nil
+	   :with-date nil
+	   :with-email nil
+	   :time-stamp-file nil
+	   :publishing-function pubfn)))
 
 (defun et-get-org-publish-project-alist (stem)
   (match system-type
@@ -352,7 +355,7 @@
 	  `(
 	    ("nice-org-html/readme"
 	     :base-directory
-	     ,(concat stem "local/repos/nice-org-html/docs/")	     
+	     ,(concat stem "local/repos/nice-org-html/docs/")
 	     :publishing-directory
 	     ,(concat stem "local/repos/nice-org-html/docs/")
 	     :base-extension "org"
@@ -368,13 +371,12 @@
 	     :with-date nil
 	     :with-email nil
 	     :time-stamp-file nil
-	     :publishing-function	     
+	     :publishing-function
 	     ,(nice-org-html-publishing-function
 	       :theme-alist
 	       ((light . solarized-light) (dark . tomorrow-night-eighties))
 	       :default-mode dark
-	       :headline-bullets (:h1 "" :h2 "▷" :h3 "" :h4 "" :h5 ""))
-	     )
+	       :headline-bullets (:h1 "" :h2 "▷" :h3 "" :h4 "" :h5 "")))
 	    ,(et-nice-org-html-sample-project
 	       stem "tsdh" 'tsdh-light 'tsdh-dark)
 	    ,(et-nice-org-html-sample-project
@@ -400,7 +402,8 @@
 			  "nice-org-html/sample/solarized"
 			  "nice-org-html/sample/spacemacs"
 			  "nice-org-html/sample/leuven"
-			  "nice-org-html/sample/modus")
+			  "nice-org-html/sample/modus"
+			  )
 	     )
 	    ("etown.dev/files"
 	     :base-directory ,(concat stem "local/repos/etown.dev/org/")
@@ -432,7 +435,7 @@
 		("Projects" . "projects")
 		("Thoughts" . "thoughts"))
 	       :footer
-	       (("© 2025" . nil)				
+	       (("© 2025" . nil)
 		("LinkedIn" . "https://www.linkedin.com/in/ewan-townshend")
 		("GitHub" . "https://github.com/ewantown")
 		("Resumé" . "other/sw-resume.pdf")
