@@ -25,7 +25,6 @@
 (let ((env (concat CONF ".env")))
   (when (file-exists-p env)
     (load-file env)))
-
 ;;==============================================================================
 (require 'package)
 (setq package-enable-at-startup t)
@@ -85,8 +84,7 @@
 
 (use-package exec-path-from-shell
   :config
-  (when (memq window-system '(max ns x))
-    (exec-path-from-shell-initialize)))
+  (exec-path-from-shell-initialize))
 
 ;; Main dispatch
 (cond ((display-graphic-p)

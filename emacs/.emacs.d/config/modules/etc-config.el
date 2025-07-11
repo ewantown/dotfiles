@@ -6,9 +6,9 @@
   (interactive)
   (use-package eww
     :bind (("C-c w" . eww)
-           :map eww-mode-map
-           ("C-q" . quit-window)
-           ("C-l" . 'eww-lnum-follow))
+	   :map eww-mode-map
+	   ("C-q" . quit-window)
+	   ("C-l" . 'eww-lnum-follow))
     :config
     (setq browse-url-browser-function
 	  (if (display-graphic-p)
@@ -16,20 +16,20 @@
 	    'eww-browse-url)))
   (use-package bookmark
     :bind (("M-s-s" . bookmark-set)
-           ("M-s-g" . bookmark-jump)
-           ("M-s-b" . bookmark-bmenu-list)))
+	   ("M-s-g" . bookmark-jump)
+	   ("M-s-b" . bookmark-bmenu-list)))
   (use-package dabbrev
     :bind (("M-m" . electric-newline-and-maybe-indent)
-           ("C-<tab>" . dabbrev-expand))
+	   ("C-<tab>" . dabbrev-expand))
     :config
     (setq dabbrev-case-distinction nil
-          dabbrev-case-fold-search nil
-          dabbrev-case-replace nil
-          dabbrev-upcase-means-case-search t))
+	  dabbrev-case-fold-search nil
+	  dabbrev-case-replace nil
+	  dabbrev-upcase-means-case-search t))
   (when (executable-find "pandoc")
     (use-package pandoc-mode
       :hook markdown-mode))
-  (et-init-ai-tools))
+  (et-init-llm))
 
 ;; (use-package pdf-tools
 ;;   :config
@@ -40,49 +40,69 @@
 ;;                                     (pdf-view-midnight-minor-mode 1)))))
 
 ;===============================================================================
-(defun et-init-ai-tools ()
+(defun et-init-ollama (&optional llm)
+  (shell-command "pkill -f 'ollama'")
+  (let ((process
+	 (start-process-shell-command
+	  "ollama service" "*ollama service*" "ollama serve")))
+    (progn
+      (setq i 0)
+      (setq ready nil)
+      (while (and (not ready) (< i 10))
+	(sleep-for 0.5)
+	(with-current-buffer (process-buffer process)
+	  (goto-char (point-max))
+	  (when (re-search-backward "Listening on" nil t)
+	    (message "Ollama server started")
+	    (setq ready 't)))
+	(1+ i))
+      (when ready
+	(and-let* ((models (shell-command-to-string "ollama list"))
+		   (llm? (and llm (string-match-p (concat "\n" llm ":") models)))
+		   (_ (string-match (concat "\n" (if llm? llm ".+") ":") models))
+		   (model (match-string 0 models))
+		   (_ (message (concat "Using Ollama model: " model))))
+	  (intern (replace-regexp-in-string "[\n:]" "" model)))))))
+
+(defun et-init-llm ()
   (interactive)
-  (use-package gptel    
+  (use-package gptel
     :config
-    (with-system darwin
-      (async-shell-command "ollama serve")
-      (setq gptel-model 'llama3
-	    gptel-backend (gptel-make-ollama "HAL"
-			    :host "localhost:11434"
-			    :stream t
-			    :models '(llama3)))
-      (gptel-make-openai "HAL"
-	:host "api.together.ai"
-	:key (getenv "GAI_API_KEY")
-	:stream t
-	:models '("mistralai/Mixtral-8x7B-Instruct-v0.1"
-		  "codellama/CodeLlama-13b-Instruct-hf"
-		  "codellama/CodeLlama-34b-Instruct-hf")))
-    (with-system gnu/linux
-      (when (getenv "WSL_DISTRO_NAME")
-	(setq
-	 gptel-model 'gpt-3.5-turbo
-	 gptel-backend
-	 ;; (gptel-make-azure "HAL"
-	 ;;   :protocol "https"
-	 ;;   :host "YOUR_RESOURCE_NAME.openai.azure.com"
-	 ;;   :endpoint "/openai/deployments/YOUR_DEPLOYMENT_NAME/chat/completions?api-version=2023-05-15"
-	 ;;   :stream t
-	 ;;   :key (getenv "GAI_API_KEY")
-	 ;;   :models '(gpt-3.5-turbo gpt-4))
-	 (gptel-make-openai "HAL"
-	   :host "api.together.ai"
-	   :key (getenv "GAI_API_KEY")
-	   :stream t
-	   :models '("meta-llama/Llama-3.3-70B-Instruct-Turbo"
-		     "mistralai/Mixtral-8x7B-Instruct-v0.1"
-		     "codellama/CodeLlama-13b-Instruct-hf"
-		     "codellama/CodeLlama-34b-Instruct-hf"))	 
-	 )))
-    (setq gptel-post-response-functions
-	  (lambda (begin end)
-	    (progn (when (string-equal "*HAL*" (buffer-name))
-		     (goto-char (point-max))))))
+    (progn
+      (let ((local-model (and (executable-find "ollama") (et-init-ollama))))
+	(cond (local-model
+	       (setq gptel-model local-model
+		     gptel-backend
+		     (gptel-make-ollama "HAL"
+		       :host "localhost:11434"
+		       :stream t
+		       :models `(,local-model))))
+	      ((and (getenv "WSL_DISTRO_NAME") nil) ;; TODO
+	       (setq
+		gptel-model 'gpt-3.5-turbo
+		gptel-backend
+		(gptel-make-azure "HAL"
+		  :protocol "https"
+		  :host "YOUR_RESOURCE_NAME.openai.azure.com"
+		  :endpoint "/openai/deployments/YOUR_DEPLOYMENT_NAME/chat/completions?api-version=2023-05-15"
+		  :stream t
+		  :key (getenv "GAI_API_KEY")
+		  :models '(gpt-3.5-turbo gpt-4))))
+	      (t
+	       (setq gptel-model 'gpt-3.5-turbo
+		     gptel-backend
+		     (gptel-make-openai "HAL"
+		       :host "api.together.ai"
+		       :key (getenv "GAI_API_KEY")
+		       :stream t
+		       :models '("meta-llama/Llama-3.3-70B-Instruct-Turbo"
+				 "mistralai/Mixtral-8x7B-Instruct-v0.1"
+				 "codellama/CodeLlama-13b-Instruct-hf"
+				 "codellama/CodeLlama-34b-Instruct-hf"))))))
+	(setq gptel-post-response-functions
+	      (lambda (begin end)
+		(progn (when (string-equal "*HAL*" (buffer-name))
+			 (goto-char (point-max)))))))
     :bind
     (:map et/gai-map
 	  ("RET" . gptel-send)
@@ -111,11 +131,11 @@
 ;;   :bind (:map et/chatgpt-map
 ;;               ("s" . chatgpt-shell-in-new-buffer)
 ;;               ("c" . chatgpt-generate-code-snippet)
-;; 	          ("m" . chatgpt-calc)
+;;		  ("m" . chatgpt-calc)
 ;;               ("e" . chatgpt-shell-explain-code)
 ;;               ("p" . chatgpt-shell-prompt)
 ;;               ("DEL" . chatgpt-shell-clear-buffer)))
- 
+
 ;; (defun chatgpt-shell-in-new-buffer ()
 ;;   "Create a new window and start a new shell in it."
 ;;   (interactive)
@@ -130,8 +150,8 @@
 ;;   (let* ((lang (read-string "Language: "))
 ;;          (func (read-string "Functionality: "))
 ;;          (prel (concat "You are just a code generator. "
-;; 		       "Respond to this only with " lang " code. "
-;; 		       "Verify that your code is syntactically correct. "
+;;		       "Respond to this only with " lang " code. "
+;;		       "Verify that your code is syntactically correct. "
 ;;                        "Pretty-print the code. "
 ;;                        "Include no preamble, nor description, nor markdown. "))
 ;;          (prmt (concat prel  "Write code in " lang " to " func)))
@@ -142,7 +162,7 @@
 ;;   (interactive)
 ;;   (let* ((mathq (read-string "Calculate: "))
 ;;          (prel (concat "You are just a smart calculator. "
-;; 		       "Respond to this only with the results of calculation. "
+;;		       "Respond to this only with the results of calculation. "
 ;;                        "Format all answers in standard mathematical notation. "
 ;;                        "Include no preamble, nor description, nor markdown."))
 ;;          (prmt (concat prel  "Calculate: " mathq)))
@@ -159,7 +179,7 @@
 ;;     (setq tramp-default-host "remote.students.cs.ubc.ca")
 ;;     (setq tramp-default-directory "~/")
 ;;     (setq tramp-ssh-controlmaster-options
-;; 	  "-o ControlMaster=auto -o ControlPath='tramp.%%C' -o ControlPersist=no")))
+;;	  "-o ControlMaster=auto -o ControlPath='tramp.%%C' -o ControlPersist=no")))
 
 ;; (setq sql-default-directory "/ssh:remote.students.cs.ubc.ca:~")
 ;; (setq sql-oracle-program "/cs/local/generic/bin/sqlplus");
@@ -173,8 +193,8 @@
 
 					;==============================================================================
 (setq erc-server "irc.libera.chat"
-      erc-nick "etown"    
-      erc-user-full-name "ET"      
+      erc-nick "etown"
+      erc-user-full-name "ET"
       erc-track-shorten-start 8
       erc-autojoin-mode 1
       erc-autojoin-channels-alist
