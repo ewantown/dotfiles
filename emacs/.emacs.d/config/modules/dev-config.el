@@ -28,10 +28,18 @@
   (use-package helm-projectile
     :bind ("C-x C-p" . 'helm-projectile))
   (use-package treemacs
-    :bind ("C-c C-t" . 'treemacs)
     :config
-    (setq treemacs-no-png-images t)
-    (setq treemacs-filewatch-mode t))
+    ;; (setq treemacs-no-png-images nil)
+    (treemacs-filewatch-mode t)
+    (when (executable-find "git") (treemacs-git-mode 'simple))
+    (treemacs-project-follow-mode)
+    :bind
+    (:map global-map
+          ("C-x t t" . treemacs)
+	  ("C-x t d" . treemacs-select-directory)
+	  ("C-x t p" . treemacs-add-and-display-current-project-exclusively)))
+  (use-package treemacs-magit
+    :after (treemacs magit))
   (use-package smartparens
     :config
     (require 'smartparens-config))
@@ -78,6 +86,10 @@
        colorProvider
        ;;foldingRangeProvider
        )))
+  (use-package editorconfig
+    :ensure t
+    :config
+    (editorconfig-mode 1))
   (add-hook 'prog-mode-hook
 	    (lambda ()
 	      (display-line-numbers-mode 1)
@@ -298,11 +310,9 @@
 
 (defun l-csharp ()
   (interactive)
-  ;;(add-to-list 'exec-path "~/omnisharp")
-  (add-to-list 'exec-path "~/.dotnet/tools")  
+  (add-to-list 'exec-path (expand-file-name "~/.dotnet/tools"))
   ;; (use-package lsp-mode
   ;;   :config  
-  ;;   (add-to-list 'exec-path "/home/ewan/.dotnet/tools/csharp-ls")
   ;;   (add-to-list 'lsp-disabled-clients 'omnisharp)
   ;;   (add-to-list 'lsp-disabled-clients 'Omnisharp))
   (use-package csharp-mode
@@ -310,12 +320,9 @@
     :config
     (let ((csharp-ls "~/.dotnet/tools/csharp-ls"))
       (setcdr (assoc '(csharp-mode csharp-ts-mode) eglot-server-programs)
-	      (eglot-alternatives
-               `((,csharp-ls)
-		 ("omnisharp" "-lsp")
-		 ("Omnisharp" "-lsp")))))
+	      `(,(expand-file-name csharp-ls))))
     :hook
-    ;;((csharp-mode csharp-ts-mode) . lsp)
+    ;; ((csharp-mode csharp-ts-mode) . lsp)
     ((csharp-mode csharp-ts-mode) . eglot-ensure))
   (use-package sharper
     :demand t
@@ -323,25 +330,26 @@
     ("C-c n" . sharper-main-transient))
   ;; https://github.com/OmniSharp/omnisharp-roslyn/issues/2589
   ;; project-find-function supporting both C# and F#:
-  (defun dotnet-mode/find-sln-or-fsproj (dir-or-file)
-    "Search for a solution or F# project file in any enclosing folders"
-    (dotnet-mode-search-upwards (rx (0+ nonl) (or ".sln" ".csproj") eol)
-				(file-name-directory dir-or-file)))
-  (defun dotnet-mode-search-upwards (regex dir)
-    (when dir
-      (or (car-safe (directory-files dir 'full regex))
-          (dotnet-mode-search-upwards regex (dotnet-mode-parent-dir dir)))))
-  (defun dotnet-mode-parent-dir (dir)
-    (let ((p (file-name-directory (directory-file-name dir))))
-      (unless (equal p dir)
-	p)))
-  ;; Make project.el aware of dotnet projects
-  (defun dotnet-mode-project-root (dir)
-    (when-let (project-file (dotnet-mode/find-sln-or-fsproj dir))
-      (cons 'dotnet (file-name-directory project-file))))
-  (cl-defmethod project-roots ((project (head dotnet)))
-    (list (cdr project)))
-  (add-hook 'project-find-functions #'dotnet-mode-project-root))
+  ;; (defun dotnet-mode/find-sln-or-fsproj (dir-or-file)
+  ;;   "Search for a solution or F# project file in any enclosing folders"
+  ;;   (dotnet-mode-search-upwards (rx (0+ nonl) (or ".sln" ".csproj") eol)
+  ;; 				(file-name-directory dir-or-file)))
+  ;; (defun dotnet-mode-search-upwards (regex dir)
+  ;;   (when dir
+  ;;     (or (car-safe (directory-files dir 'full regex))
+  ;;         (dotnet-mode-search-upwards regex (dotnet-mode-parent-dir dir)))))
+  ;; (defun dotnet-mode-parent-dir (dir)
+  ;;   (let ((p (file-name-directory (directory-file-name dir))))
+  ;;     (unless (equal p dir)
+  ;; 	p)))
+  ;; ;; Make project.el aware of dotnet projects
+  ;; (defun dotnet-mode-project-root (dir)
+  ;;   (when-let (project-file (dotnet-mode/find-sln-or-fsproj dir))
+  ;;     (cons 'dotnet (file-name-directory project-file))))
+  ;; (cl-defmethod project-roots ((project (head dotnet)))
+  ;;   (list (cdr project)))
+  ;; (add-hook 'project-find-functions #'dotnet-mode-project-root)
+  )
 
 ;;==============================================================================
 ;; Markup langs

@@ -2,7 +2,8 @@
 ;; Miscellaneous configuration
 ;==============================================================================
 (defun et-init-etc (stem)
-  "Initialize miscellaneous tools"  
+  "Initialize miscellaneous tools"
+  (interactive)
   (use-package eww
     :bind (("C-c w" . eww)
            :map eww-mode-map
@@ -25,6 +26,9 @@
           dabbrev-case-fold-search nil
           dabbrev-case-replace nil
           dabbrev-upcase-means-case-search t))
+  (when (executable-find "pandoc")
+    (use-package pandoc-mode
+      :hook markdown-mode))
   (et-init-ai-tools))
 
 ;; (use-package pdf-tools
