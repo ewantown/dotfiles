@@ -42,6 +42,7 @@
     };    
     brews = [
       "ollama"
+      "npm"
     ];
     casks = [
       "mactex"

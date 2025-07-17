@@ -454,9 +454,57 @@
 	     :publishing-function org-publish-attachment)
 	    ("etown.dev"
 	     :components ("etown.dev/files" "etown.dev/images" "etown.dev/other"))
+	    ("notes/files"
+	     :base-directory ,(concat stem "local/repos/notes")
+	     :base-extension "org"
+	     :publishing-directory ,(concat stem "local/repos/etown.dev/notes")
+	     :htmlized-source t
+	     :recursive t
+	     :headline-levels 3
+	     :section-numbers nil
+	     :with-entities t
+	     :with-latex t
+	     :with-toc t
+	     :with-author nil
+	     :with-creator nil
+	     :with-date nil
+	     :with-email nil
+	     :time-stamp-file nil
+	     :auto-sitemap t
+	     :sitemap-title "Index"
+	     :publishing-function
+	     (,(nice-org-html-publishing-function
+		:theme-alist
+		((dark . spacemacs-dark) (light . spacemacs-light))
+		:default-mode dark
+		:headline-bullets (:h1 "" :h2 "" :h3 "▷" :h4 "" :h5 "")
+		:header
+		(("Index" . "/notes/sitemap"))
+		:footer nil)
+	      ,(lambda (plist filename pub-dir)
+		 (message (concat "filename" filename))
+		 (message (concat "pub-dir" pub-dir))
+		 (let ((staticrypt-installed (executable-find "staticrypt"))
+		       (npm-installed (executable-find "npm")))
+		   (when (and (not staticrypt-installed) npm-installed)
+		     (shell-command "npm install -g staticrypt"))
+		   (when npm-installed
+		     (let ((pwd (or (getenv "STATICRYPT_PASSWORD") "decrypt")))
+		       (shell-command
+			(concat "cd " (expand-file-name pub-dir) " && "
+				"staticrypt "
+				(replace-regexp-in-string
+				 ".org"
+				 ".html"
+				 (file-name-nondirectory filename))
+				" -d ."
+				" -c false"				
+				" --salt 53e46e71350bc18681d6accc425e17b9"
+				" -p " pwd " --short "
+				"--template-color-primary \"#515151\" "
+				"--template-color-secondary \"#515151\""))))))))
 	    ))
 	 ('gnu/linux  '())
 	 ('windows-nt '())))
-
 ;==============================================================================
-(provide 'org-config)
+(provide.html-config)

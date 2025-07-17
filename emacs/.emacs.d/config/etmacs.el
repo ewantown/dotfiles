@@ -50,7 +50,7 @@
 (with-system darwin
   (setq mac-option-modifier 'meta)
   (add-to-list 'exec-path "/usr/local/bin")
-  (setq LANGS '(l-chez l-javascript l-typescript)))
+  (setq LANGS '(l-javascript l-typescript)))
 
 (with-system windows-nt
   (setq w32-apps-modifier 'super)
