@@ -472,6 +472,8 @@
 	     :time-stamp-file nil
 	     :auto-sitemap t
 	     :sitemap-title "Index"
+	     :sitemap-filename "index.org"
+	     :sitemap-style tree
 	     :publishing-function
 	     (,(nice-org-html-publishing-function
 		:theme-alist
@@ -507,4 +509,4 @@
 	 ('gnu/linux  '())
 	 ('windows-nt '())))
 ;==============================================================================
-(provide.html-config)
+(provide 'org-config)
