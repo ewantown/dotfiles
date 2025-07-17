@@ -481,7 +481,7 @@
 		:default-mode dark
 		:headline-bullets (:h1 "" :h2 "" :h3 "▷" :h4 "" :h5 "")
 		:header
-		(("Index" . "/notes/sitemap"))
+		(("Index" . "/notes/index.html"))
 		:footer nil)
 	      ,(lambda (plist filename pub-dir)
 		 (message (concat "filename" filename))
