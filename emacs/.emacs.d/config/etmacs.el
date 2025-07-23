@@ -8,7 +8,7 @@
       user-mail-address "ewan@etown.dev")
 
 ;;==============================================================================
-(defconst STEM "~/-/")
+(defconst STEM (expand-file-name "~/-/"))
 (defconst CONF (concat user-emacs-directory "config/"))
 (defconst MODULES (concat CONF "modules/"))
 (defconst DROPINS (concat CONF "dropins/"))

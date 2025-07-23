@@ -43,6 +43,7 @@
     brews = [
       "ollama"
       "npm"
+      "aspell"
     ];
     casks = [
       "mactex"

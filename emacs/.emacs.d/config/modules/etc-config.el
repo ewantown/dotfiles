@@ -29,6 +29,10 @@
   (when (executable-find "pandoc")
     (use-package pandoc-mode
       :hook markdown-mode))
+  (when (executable-find "aspell")
+    (setq ispell-program-name (executable-find "aspell"))
+    (setq ispell-list-command "list")
+    (setq ispell-extra-args '("--dont-tex-check-comments")))
   (et-init-llm))
 
 ;; (use-package pdf-tools

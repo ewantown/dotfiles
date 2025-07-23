@@ -9,6 +9,7 @@
                 "rules": [
                     {
                         "description": "Change spacebar to left_control.",
+                        "enabled": false,
                         "manipulators": [
                             {
                                 "from": {
