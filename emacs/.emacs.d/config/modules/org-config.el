@@ -75,7 +75,8 @@
 	    ("{*}" . (:foreground "#9cfdcd" :weight bold))))
     (setq org-agenda-include-diary t)
     (setq org-agenda-files
-	  (file-expand-wildcards (concat org-directory "*.org")))
+	  (mapcar (lambda (f) (concat org-directory f))
+		  '("events.org" "notes.org" "routine.org" "tasks.org")))
     (setq org-agenda-prefix-format
 	  '((agenda . " %?-12t% s ")
 	    (todo . " %i ")
@@ -140,7 +141,7 @@
 	   "* { } [#%^{Priority}] %?%i"
 	   :empty-lines 1)
 	  ("l" "Log" entry
-	   (file+datetree+prompt ,(concat org-dire "log.org"))
+	   (file+datetree+prompt ,(concat org-directory "log.org"))
 	   "* %T%i"
 	   :empty-lines 1)
 	  ;; 	    ("w" "Weigh-in" entry
