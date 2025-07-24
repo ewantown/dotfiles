@@ -5,6 +5,7 @@
 (defun et-init-org (stem)
   (setq org-directory
 	(concat stem (if (eq system-type 'darwin) "cloud/org/" "org/")))
+  (unless (file-exists-p org-directory) (make-directory org-directory))
   (use-package htmlize)
   (use-package org-superstar)
   (use-package org
@@ -48,7 +49,8 @@
 (defun et-init-org-time ()
   (progn
     (setq diary-file (concat org-directory "diary.org"))
-    (unless (file-exists-p diary-file) (write-region "" nil diary-file))
+    (unless (file-exists-p diary-file)
+      (with-temp-buffer (write-file diary-file)))
 
     (setq calendar-date-style 'iso
 	  diary-show-holidays-flag nil
@@ -75,7 +77,11 @@
 	    ("{*}" . (:foreground "#9cfdcd" :weight bold))))
     (setq org-agenda-include-diary t)
     (setq org-agenda-files
-	  (mapcar (lambda (f) (concat org-directory f))
+	  (mapcar (lambda (f)
+		    (let ((file (concat org-directory f)))
+		      (progn (unless (file-exists-p file)
+			       (with-temp-buffer (write-file file)))
+			     file)))
 		  '("events.org" "notes.org" "routine.org" "tasks.org")))
     (setq org-agenda-prefix-format
 	  '((agenda . " %?-12t% s ")
