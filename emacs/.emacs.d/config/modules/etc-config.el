@@ -45,13 +45,14 @@
 
 ;===============================================================================
 (defun et-init-ollama (&optional llm)
-  (shell-command "pkill -f 'ollama'")
   (let ((process
-	 (start-process-shell-command
-	  "ollama service" "*ollama service*" "ollama serve")))
+	 (if (eq system-type 'gnu/linux) nil
+	   (progn (shell-command "pkill -f 'ollama'")
+		  (start-process-shell-command
+		   "ollama service" "*ollama service*" "ollama serve")))))
     (progn
+      (setq ready (if (eq process nil) 't nil))
       (setq i 0)
-      (setq ready nil)
       (while (and (not ready) (< i 10))
 	(sleep-for 0.5)
 	(with-current-buffer (process-buffer process)
@@ -61,12 +62,12 @@
 	    (setq ready 't)))
 	(1+ i))
       (when ready
-	(and-let* ((models (shell-command-to-string "ollama list"))
-		   (llm? (and llm (string-match-p (concat "\n" llm ":") models)))
-		   (_ (string-match (concat "\n" (if llm? llm ".+") ":") models))
-		   (model (match-string 0 models))
-		   (_ (message (concat "Using Ollama model: " model))))
-	  (intern (replace-regexp-in-string "[\n:]" "" model)))))))
+	(let* ((models (shell-command-to-string "ollama list"))
+	       (llm? (and llm (string-match-p (concat "\n" llm ":") models)))
+	       (_ (string-match (concat "\n" (if llm? llm ".+") ":") models))
+	       (model (match-string 0 models))
+	       (_ (message (concat "Using Ollama model: " model))))
+	  (and model (intern (replace-regexp-in-string "[\n:]" "" model))))))))
 
 (defun et-init-llm ()
   (interactive)

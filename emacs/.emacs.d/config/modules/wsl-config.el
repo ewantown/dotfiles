@@ -5,6 +5,7 @@
   "Initialize on Windows Subsystem for Linux"
   (et-init-wsl-env)
   (et-init-magit-switch)
+  (et-init-wsl-browse-url-browser)
   (when (not (display-graphic-p))
     (et-init-wsl-nw-clipboard))
   (use-package sudo-edit
@@ -20,6 +21,14 @@
     (use-package xclip
       :config (xclip-mode 1)))
 
+(defun et-init-wsl-browse-url-browser ()
+  (let ((cmd-exe (executable-find "cmd.exe"))
+	(cmd-args '("/c" "start")))
+    (when (file-exists-p cmd-exe)
+      (setq browse-url-generic-program  cmd-exe
+	    browse-url-generic-args     cmd-args
+	    browse-url-browser-function 'browse-url-generic
+	    search-web-default-browser  'browse-url-generic))))
 ;;==============================================================================
 ;; Make Magit useable across the Windows/Linux air-gap
 
