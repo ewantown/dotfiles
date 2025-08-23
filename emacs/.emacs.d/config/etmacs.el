@@ -9,6 +9,7 @@
 
 ;;==============================================================================
 (defconst STEM (expand-file-name "~/-/"))
+(when (not (file-directory-p STEM)) (make-directory STEM t))
 (defconst CONF (concat user-emacs-directory "config/"))
 (defconst MODULES (concat CONF "modules/"))
 (defconst DROPINS (concat CONF "dropins/"))
@@ -50,7 +51,7 @@
 (with-system darwin
   (setq mac-option-modifier 'meta)
   (add-to-list 'exec-path "/usr/local/bin")
-  (setq LANGS '(l-javascript l-typescript)))
+  (setq LANGS '(l-javascript l-typescript l-clojure)))
 
 (with-system windows-nt
   (setq w32-apps-modifier 'super)
@@ -82,9 +83,10 @@
 (require 'patches)
 (patch)
 
-(use-package exec-path-from-shell
-  :config
-  (exec-path-from-shell-initialize))
+(with-systems (darwin gnu/linux)
+  (use-package exec-path-from-shell
+    :config
+    (exec-path-from-shell-initialize)))
 
 ;; Main dispatch
 (cond ((display-graphic-p)

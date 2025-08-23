@@ -8,14 +8,14 @@
   };
   environment.shells = with pkgs; [
     bash
-    zsh    
+    zsh
   ];
   environment.shellAliases = {
     "ls" = "ls -a";
     "nixit" =      
       "cd /Users/${username}/.nix "
-      + "&& sudo $(which nix) build .#darwinConfigurations.ETAir.system --show-trace "
-      + "&& sudo $(which nix) run nix-darwin -- switch --flake .#ETAir ";
+      + "&& sudo -H $(which nix) build .#darwinConfigurations.ETAir.system --show-trace "
+      + "&& sudo -H $(which nix) run nix-darwin -- switch --flake .#ETAir ";
       /*+ "&& sudo $(which darwin-rebuild) switch --flake";*/
   };
   
@@ -39,11 +39,16 @@
     masApps = {
       Amphetamine = 937984704;
       Bitwarden = 1352778147;
-    };    
+    };
+    taps = [
+      "borkdude/brew"
+    ];
     brews = [
       "ollama"
       "npm"
       "aspell"
+      "babashka"
+      "clojure/tools/clojure"
     ];
     casks = [
       "mactex"
@@ -58,6 +63,9 @@
       "karabiner-elements"
       "libreoffice"
       "mullvadvpn"
+      "racket"
+      "temurin@21"
     ];    
   };
+
 }

@@ -104,24 +104,26 @@
 				 "mistralai/Mixtral-8x7B-Instruct-v0.1"
 				 "codellama/CodeLlama-13b-Instruct-hf"
 				 "codellama/CodeLlama-34b-Instruct-hf"))))))
-	(setq gptel-post-response-functions
-	      (lambda (begin end)
-		(progn (when (string-equal "*HAL*" (buffer-name))
-			 (goto-char (point-max)))))))
+      (setq gptel-post-response-functions
+	    (lambda (begin end)
+	      (progn (when (string-equal "*HAL*" (buffer-name))
+		       (goto-char (point-max)))))))
     :bind
     (:map et/gai-map
 	  ("RET" . gptel-send)
 	  ("ESC" . gptel-abort)
-	  ("a" . gptel-add)
+	  ("c" . gptel-add) ;; poorly named - adds/removes context
 	  ("m" . gptel-menu)
 	  ("r" . gptel-rewrite)
 	  ("o" . gptel)))
-    ;; (use-package chatgpt-shell
-    ;;   :custom
-    ;;   ((chatgpt-shell-openai-key (getenv "TAI_KEY"))
-    ;;    (chatgpt-shell-api-url-base "api.together.ai")
-    ;;    (chatgpt-shell-model-version "mistralai/Mixtral-8x7B-Instruct-v0.1")))
-    )
+  ;; (use-package chatgpt-shell
+  ;;   :custom
+  ;;   ((chatgpt-shell-openai-key (getenv "TAI_KEY"))
+  ;;    (chatgpt-shell-api-url-base "api.together.ai")
+  ;;    (chatgpt-shell-model-version "mistralai/Mixtral-8x7B-Instruct-v0.1")))
+  )
+
+
 
 
 

@@ -7,6 +7,12 @@
   `(when (eq system-type ',type)
      ,@body))
 
+(defmacro with-systems (types &rest body)
+  "Evaluate BODY if `system-type' equals is in TYPES."
+  (declare (indent defun))
+  `(when (member system-type ',types)
+     ,@body))
+
 (require 'pcase)
 ;; Examples patterns are syntactic, but also predicates, funcs,...
 

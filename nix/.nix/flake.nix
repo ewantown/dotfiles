@@ -20,7 +20,7 @@
     nixpkgs-firefox-darwin.url = "github:bandithedoge/nixpkgs-firefox-darwin";
   };
 
-  outputs = inputs @ { self, nixpkgs, darwin, home-manager, nix-homebrew, nixpkgs-firefox-darwin }:    
+  outputs = inputs @ { self, nixpkgs, darwin, home-manager, nix-homebrew, nixpkgs-firefox-darwin }:
     let
       system = "aarch64-darwin";
       hostname = "ETAir";
@@ -32,18 +32,18 @@
         inherit system specialArgs;        
         modules = [
           inputs.nix-homebrew.darwinModules.nix-homebrew
-
-          ./modules/core.nix          
-          ./modules/apps.nix
-          ./modules/macos.nix
-                    
+                              
           inputs.home-manager.darwinModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
             home-manager.extraSpecialArgs = specialArgs;
             home-manager.users.${username} = import ./modules/home.nix;
-          }                    
+          }
+
+          ./modules/core.nix          
+          ./modules/apps.nix
+          ./modules/macos.nix
         ];
       };
     };

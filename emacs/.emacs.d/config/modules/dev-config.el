@@ -12,7 +12,7 @@
 ;; General programming config
 
 (defun et-schemify-mode-map (a-lisp2-mode-map)
-  (progn (define-key a-lisp2-mode-map (kbd "C-M-y")		     
+  (progn (define-key a-lisp2-mode-map (kbd "C-M-y")
 		     (lambda () (interactive)
 		       (progn (insert "(lambda ())") (backward-char 2))))
 	 (define-key a-lisp2-mode-map (kbd "C-M-;")
@@ -23,7 +23,10 @@
   "Initialize all programming modes"
   (interactive)
   (message "Initializing prog modes")
-  (use-package magit)
+  (when-let* (git (or (exectuable-find "git") (getenv "git-path")))
+    (use-package magit
+      :init
+      (setq magit-git-executable git)))
   ;;(use-package projectile)
   (use-package helm-projectile
     :bind ("C-x C-p" . 'helm-projectile))
@@ -35,7 +38,7 @@
     (treemacs-project-follow-mode)
     :bind
     (:map global-map
-          ("C-x t t" . treemacs)
+	  ("C-x t t" . treemacs)
 	  ("C-x t d" . treemacs-select-directory)
 	  ("C-x t p" . treemacs-add-and-display-current-project-exclusively)))
   (use-package treemacs-magit
@@ -102,7 +105,7 @@
 	      (treesit-auto-mode 1)
 	      (setq prettify-symbols-alist
 		    '(("lambda" . 955)	;?λ
-		      ("funcall" . ?⦿)))		      
+		      ("funcall" . ?⦿)))
 	      (prettify-symbols-mode 1)
 	      (et-schemify-mode-map emacs-lisp-mode-map))))
 
@@ -126,14 +129,14 @@
       (progn (funcall def-racket-key "C-M-y"
 	       (lambda () (interactive)
 		 (progn (insert "(λ ())") (backward-char 2))))
-	     (funcall def-racket-key "C-x C-e" 'racket-eval-last-sexp)	     
-	     (funcall def-racket-key "C-M-<return>" 'racket-run)	     
+	     (funcall def-racket-key "C-x C-e" 'racket-eval-last-sexp)
+	     (funcall def-racket-key "C-M-<return>" 'racket-run)
 	     (funcall def-racket-key "C-c r" (lambda () (interactive) (insert "ρ")) t)
 	     (funcall def-racket-key "C-c s" (lambda () (interactive) (insert "σ")) t)
 	     (funcall def-racket-key "C-c d" (lambda () (interactive) (insert "•")) t)
 	     (funcall def-racket-key "C-c -" (lambda () (interactive) (insert "→")) t)
-	     (funcall def-racket-key "C-c c" (lambda () (interactive) (insert "▷")) t)	     
-	     (funcall def-racket-key "C-c e" (lambda () (interactive) (insert "ε")) t) 
+	     (funcall def-racket-key "C-c c" (lambda () (interactive) (insert "▷")) t)
+	     (funcall def-racket-key "C-c e" (lambda () (interactive) (insert "ε")) t)
 	     (funcall def-racket-key "C-c b" (lambda () (interactive) (insert "□")) t)
 	     (funcall def-racket-key "C-c t" (lambda () (interactive) (insert "⊤")) t)
 	     (funcall def-racket-key "C-c f" (lambda () (interactive) (insert "⊥")) t)
@@ -150,7 +153,7 @@
   (use-package geiser-chez
     :hook scheme-mode
     :bind
-    (:map scheme-mode-map	  
+    (:map scheme-mode-map
 	  ("C-x C-e" . geiser-eval-last-sexp)
 	  ("C-M-y" .
 	   (lambda () (interactive)
@@ -176,7 +179,7 @@
 (defun l-latex ()
   "Initialize latex environment"
   (interactive)
-  (message "Initializing LaTeX mode")	       
+  (message "Initializing LaTeX mode")
   (add-to-list 'eglot-server-programs
 	       '((latex-mode) "texlab")))
 
@@ -216,11 +219,11 @@
   (flycheck-add-mode 'javascript-eslint 'typescript-ts-mode)
   (l-typescript)
   (add-hook 'js-mode-hook
-          (lambda ()
+	  (lambda ()
 	    (eglot-ensure)
-            (setq indent-tabs-mode t) 
-            (setq tab-width 4)
-            (setq js-indent-level 4))))
+	    (setq indent-tabs-mode t)
+	    (setq tab-width 4)
+	    (setq js-indent-level 4))))
 
 (defun l-web ()
   "Initialize web-dev env"
@@ -236,7 +239,7 @@
 	  web-mode-enable-current-element-highlight t)
     ;; (let ((node_modules "/home/ewan/.nvm/versions/node/v18.20.8/lib/node_modules"))
     ;;   (add-to-list 'eglot-server-programs
-    ;; 		   '(web-mode "node"
+    ;;		   '(web-mode "node"
     ;;                           (concat node_modules "/@angular/language-server/")
     ;;                           "--ngProbeLocations"
     ;;                           node_modules
@@ -312,7 +315,7 @@
   (interactive)
   (add-to-list 'exec-path (expand-file-name "~/.dotnet/tools"))
   ;; (use-package lsp-mode
-  ;;   :config  
+  ;;   :config
   ;;   (add-to-list 'lsp-disabled-clients 'omnisharp)
   ;;   (add-to-list 'lsp-disabled-clients 'Omnisharp))
   (use-package csharp-mode
@@ -333,7 +336,7 @@
   ;; (defun dotnet-mode/find-sln-or-fsproj (dir-or-file)
   ;;   "Search for a solution or F# project file in any enclosing folders"
   ;;   (dotnet-mode-search-upwards (rx (0+ nonl) (or ".sln" ".csproj") eol)
-  ;; 				(file-name-directory dir-or-file)))
+  ;;				(file-name-directory dir-or-file)))
   ;; (defun dotnet-mode-search-upwards (regex dir)
   ;;   (when dir
   ;;     (or (car-safe (directory-files dir 'full regex))
@@ -341,7 +344,7 @@
   ;; (defun dotnet-mode-parent-dir (dir)
   ;;   (let ((p (file-name-directory (directory-file-name dir))))
   ;;     (unless (equal p dir)
-  ;; 	p)))
+  ;;	p)))
   ;; ;; Make project.el aware of dotnet projects
   ;; (defun dotnet-mode-project-root (dir)
   ;;   (when-let (project-file (dotnet-mode/find-sln-or-fsproj dir))
@@ -376,29 +379,29 @@
 
 ;;==============================================================================
 ;; Java
-(defun l-java ()  
+(defun l-java ()
   (setcdr (assoc '(java-mode java-ts-mode) eglot-server-programs)
-          `(
+	  `(
 	    "/mnt/c/Program Files/Git/bin/bash.exe -c java"
-            "-Declipse.application=org.eclipse.jdt.ls.core.id1"
-            "-Dosgi.bundles.defaultStartLevel=4"
-            "-Declipse.product=org.eclipse.jdt.ls.core.product"
-            "-Dlog.level=ALL"
-            "-noverify"
-            "-Xmx256m"
-            "-jar"
-            "/c/Eclipse462/dropins/jdtls-jdk8/plugins/org.eclipse.equinox.launcher_1.5.700.v20200207-2156.jar"
-            "-configuration"
-            "/c/Eclipse462/dropins/jdtls-jdk8/config_win"
-            "-data"
-            "/c/Users/ET20469/jdtls-cache"
+	    "-Declipse.application=org.eclipse.jdt.ls.core.id1"
+	    "-Dosgi.bundles.defaultStartLevel=4"
+	    "-Declipse.product=org.eclipse.jdt.ls.core.product"
+	    "-Dlog.level=ALL"
+	    "-noverify"
+	    "-Xmx256m"
+	    "-jar"
+	    "/c/Eclipse462/dropins/jdtls-jdk8/plugins/org.eclipse.equinox.launcher_1.5.700.v20200207-2156.jar"
+	    "-configuration"
+	    "/c/Eclipse462/dropins/jdtls-jdk8/config_win"
+	    "-data"
+	    "/c/Users/ET20469/jdtls-cache"
 	    ;;"jdtls" "-data" "/home/user/.cache/emacs/workspace/"
-            ;;"-javaagent:/home/user/work/src/lombok.jar"
-            ;;"-Xbootclasspath/a:/home/user/work/src/lombok.jar"
-            ;;"--jvm-arg=-XX:+UseG1GC"
-            ;;"--jvm-arg=-XX:+UseStringDeduplication"
-            ;;"-Djava.format.settings.url=file:///home/user/code-format.xml"
-            ;;"-Djava.format.settings.profile=myown"
+	    ;;"-javaagent:/home/user/work/src/lombok.jar"
+	    ;;"-Xbootclasspath/a:/home/user/work/src/lombok.jar"
+	    ;;"--jvm-arg=-XX:+UseG1GC"
+	    ;;"--jvm-arg=-XX:+UseStringDeduplication"
+	    ;;"-Djava.format.settings.url=file:///home/user/code-format.xml"
+	    ;;"-Djava.format.settings.profile=myown"
 	    )))
 
 ;;==============================================================================

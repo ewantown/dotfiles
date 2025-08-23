@@ -176,6 +176,7 @@
   (org-babel-do-load-languages
    'org-babel-load-languages
    '((C . t)
+     (clojure . t)
      ;;(chez .t)
      ;;(racket . t)
      (scheme . t)
