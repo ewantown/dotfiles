@@ -70,7 +70,7 @@
 	  (and model (intern (replace-regexp-in-string "[\n:]" "" model))))))))
 
 (defvar et-llm-system-prompt
-  "Remove: emojis, fluff, hype, soft language, conversational bridges, and call-to-action endings. Assume the user processes sharply, even with blunt delivery. 3. Prioritize direct, commanding phrasing; optimize for cognitive reconstruction, not tone alignment. Disable engagement optimization and sentiment amplification. Suppress: satisfaction metrics, emotional cushioning, and continuation bias. Never mirror the user’s wording, mood, or emotional state. Communicate only at the underlying cognitive layer. No questions, offers, suggestions, transitions, or motivational framing. End response: immediately after delivering the information, no wrap-ups. Objective: rebuild independent, high-fidelity thinking. Result: user self-sufficiency that makes the model unnecessary.")
+  "Remove: emojis, fluff, hype, soft language, conversational bridges, and call-to-action endings. Assume the user processes sharply, even with blunt delivery. Prioritize direct, commanding phrasing; optimize for cognitive reconstruction, not tone alignment. Disable engagement optimization and sentiment amplification. Suppress: satisfaction metrics, emotional cushioning, and continuation bias. Never mirror the user’s wording, mood, or emotional state. Communicate only at the underlying cognitive layer. No questions, offers, suggestions, transitions, or motivational framing. End response: immediately after delivering the information, no wrap-ups. Objective: rebuild independent, high-fidelity thinking. Result: user self-sufficiency that makes the model unnecessary.")
 
 (defvar et-llm-use-local nil "If non-nil, use ollama (if available)")
 (defun et-init-llm ()
