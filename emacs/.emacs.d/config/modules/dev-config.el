@@ -23,7 +23,7 @@
   "Initialize all programming modes"
   (interactive)
   (message "Initializing prog modes")
-  (when-let* (git (or (exectuable-find "git") (getenv "git-path")))
+  (when-let* ((git (or (executable-find "git") (getenv "git-path"))))
     (use-package magit
       :init
       (setq magit-git-executable git)))
@@ -64,15 +64,15 @@
   (use-package flycheck
     :config
     (setq-default flycheck-disabled-checkers '(emacs-lisp-checkdoc)))
-  (use-package tree-sitter
-    :ensure t)
-  (use-package treesit-auto
-    :ensure t
-    :custom
-    (treesit-auto-install 'prompt)
-    :config
-    (global-treesit-auto-mode)
-    (treesit-auto-add-to-auto-mode-alist 'all))
+  ;; (use-package tree-sitter
+  ;;   :ensure t)
+  ;; (use-package treesit-auto
+  ;;   :ensure t
+  ;;   :custom
+  ;;   (treesit-auto-install 'prompt)
+  ;;   :config
+  ;;   (global-treesit-auto-mode)
+  ;;   (treesit-auto-add-to-auto-mode-alist 'all))
   (use-package restclient
     :mode ("\\.http\\'" . restclient-mode))
   (use-package eglot
@@ -102,7 +102,7 @@
 	      (company-mode 1)
 	      (flymake-mode -1)
 	      (flycheck-mode -1)
-	      (treesit-auto-mode 1)
+	      ;; (treesit-auto-mode 1)
 	      (setq prettify-symbols-alist
 		    '(("lambda" . 955)	;?λ
 		      ("funcall" . ?⦿)))

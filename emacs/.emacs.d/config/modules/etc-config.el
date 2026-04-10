@@ -69,12 +69,20 @@
 	       (_ (message (concat "Using Ollama model: " model))))
 	  (and model (intern (replace-regexp-in-string "[\n:]" "" model))))))))
 
+(defvar et-llm-system-prompt
+  "Remove: emojis, fluff, hype, soft language, conversational bridges, and call-to-action endings. Assume the user processes sharply, even with blunt delivery. 3. Prioritize direct, commanding phrasing; optimize for cognitive reconstruction, not tone alignment. Disable engagement optimization and sentiment amplification. Suppress: satisfaction metrics, emotional cushioning, and continuation bias. Never mirror the user’s wording, mood, or emotional state. Communicate only at the underlying cognitive layer. No questions, offers, suggestions, transitions, or motivational framing. End response: immediately after delivering the information, no wrap-ups. Objective: rebuild independent, high-fidelity thinking. Result: user self-sufficiency that makes the model unnecessary.")
+
+(defvar et-llm-use-local nil "If non-nil, use ollama (if available)")
 (defun et-init-llm ()
   (interactive)
   (use-package gptel
     :config
     (progn
-      (let ((local-model (and (executable-find "ollama") (et-init-ollama))))
+      (setf (alist-get 'default gptel-directives) et-llm-system-prompt)
+      (setq gptel--system-message et-llm-system-prompt)
+      (let ((local-model (and et-llm-use-local
+			      (executable-find "ollama")
+			      (et-init-ollama))))
 	(cond (local-model
 	       (setq gptel-model local-model
 		     gptel-backend
@@ -94,13 +102,14 @@
 		  :key (getenv "GAI_API_KEY")
 		  :models '(gpt-3.5-turbo gpt-4))))
 	      (t
-	       (setq gptel-model 'gpt-3.5-turbo
-		     gptel-backend
+	       (setq gptel-model 'openai/gpt-oss-120b		     
+		     gptel-backend		     
 		     (gptel-make-openai "HAL"
 		       :host "api.together.ai"
 		       :key (getenv "GAI_API_KEY")
 		       :stream t
-		       :models '("meta-llama/Llama-3.3-70B-Instruct-Turbo"
+		       :models '("openai/gpt-oss-120b"
+				 "meta-llama/Llama-3.3-70B-Instruct-Turbo"
 				 "mistralai/Mixtral-8x7B-Instruct-v0.1"
 				 "codellama/CodeLlama-13b-Instruct-hf"
 				 "codellama/CodeLlama-34b-Instruct-hf"))))))
@@ -176,7 +185,7 @@
 ;;     (chatgpt-shell-send-to-buffer prmt)))
 
 
-					;==============================================================================
+;;==============================================================================
 ;; Remote
 ;; (use-package tramp
 ;;   :config
@@ -191,14 +200,14 @@
 ;; (setq sql-default-directory "/ssh:remote.students.cs.ubc.ca:~")
 ;; (setq sql-oracle-program "/cs/local/generic/bin/sqlplus");
 ;; (setq sql-oracle-login-params '("ora_eat" "a37371242" "stu"))
-					;(add-hook 'sql-login-hook 'login-hook)
-					;(defun login-hook ()
-					;  "Custom SQL log-in behaviours. See `sql-login-hook'."
-					;  (setq sql-prompt-regexp ".*")
-					;  (let ((proc (get-buffer-process (current-buffer))))
-					;    (comint-send-string proc "ora_eat/a37371242@stu\n")))
+;;(add-hook 'sql-login-hook 'login-hook)
+;;(defun login-hook ()
+;;  "Custom SQL log-in behaviours. See `sql-login-hook'."
+;;  (setq sql-prompt-regexp ".*")
+;;  (let ((proc (get-buffer-process (current-buffer))))
+;;    (comint-send-string proc "ora_eat/a37371242@stu\n")))
 
-					;==============================================================================
+;;==============================================================================
 (setq erc-server "irc.libera.chat"
       erc-nick "etown"
       erc-user-full-name "ET"

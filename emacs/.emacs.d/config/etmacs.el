@@ -89,7 +89,7 @@
     (exec-path-from-shell-initialize)))
 
 ;; Main dispatch
-(cond ((display-graphic-p)
+(cond ((or (daemonp) (display-graphic-p))
        (progn (et-init-gui CONF)
 	      (et-init-org STEM)
 	      (et-init-etc STEM)
@@ -116,7 +116,7 @@
   (byte-recompile-directory (concat user-emacs-directory "elpa/") 0))
 
 (defun et-clock-startup ()
-  (message "*** Emacs loaded in %s with %d garbage collections."
+  (message "*** Loaded in %s with %d garbage collections."
 	   (format "%.2f seconds"
 		   (float-time (time-subtract after-init-time
 					      before-init-time)))
